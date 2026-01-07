@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Requirement Intelligence Agent</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+</head>
+
+<body class="bg-gray-900 text-white">
+
+  <div class="container mx-auto px-8 py-8">
+    <h1 class="text-3xl font-bold mb-6">
+      Requirement Intelligence Agent
+    </h1>
+
+    <!-- ================= TEXT ANALYZER ================= -->
+    <div class="bg-gray-800 p-5 rounded-lg mb-6">
+      <h2 class="text-xl font-semibold mb-3">
+        Paste Requirement Document Text
+      </h2>
+
+      <form id="textForm">
+        <textarea
+          name="text"
+          rows="10"
+          class="w-full p-3 rounded bg-gray-700 border border-gray-600"
+          placeholder="Paste requirement text here..."
+        ></textarea>
+
+        <button
+          type="submit"
+          class="mt-3 px-4 py-2 bg-yellow-400 text-black font-bold rounded"
+        >
+          Analyze Text
+        </button>
+      </form>
+    </div>
+
+    <!-- ================= PDF ANALYZER ================= -->
+    <div class="bg-gray-800 p-5 rounded-lg mb-6">
+      <h2 class="text-xl font-semibold mb-3">
+        Upload PDF Requirement Document
+      </h2>
+
+      <form id="pdfForm" enctype="multipart/form-data">
+        <input
+          type="file"
+          name="file"
+          accept="application/pdf"
+          class="text-white"
+        />
+
+        <button
+          type="submit"
+          class="ml-3 px-4 py-2 bg-yellow-400 text-black font-bold rounded"
+        >
+          Analyze PDF
+        </button>
+      </form>
+    </div>
+
+    <!-- ================= RESULT PANEL ================= -->
+    <div class="bg-gray-800 p-5 rounded-lg">
+      <h2 class="text-xl font-semibold mb-3">Analysis Result</h2>
+
+      <pre
+        id="resultBox"
+        class="bg-black text-green-400 p-4 rounded overflow-auto"
+        style="min-height: 160px"
+      >Waiting for input...</pre>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT JS ================= -->
+  <script>
+    async function handleResponse(res) {
+      const box = document.getElementById("resultBox");
+
+      try {
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch {
+        box.textContent = "Server returned no JSON / crashed";
+      }
+    }
+
+    // TEXT SUBMIT
+    document.getElementById("textForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+
+      const res = await fetch("/api/ui/analyze-text", {
+        method: "POST",
+        body: formData
+      });
+
+      await handleResponse(res);
+    });
+
+    // PDF SUBMIT
+    document.getElementById("pdfForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+
+      const res = await fetch("/api/ui/analyze-pdf", {
+        method: "POST",
+        body: formData
+      });
+
+      await handleResponse(res);
+    });
+  </script>
+
+</body>
+</html>
