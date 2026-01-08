@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-pattern_line = re.compile(r'^\s*os\.environ\[\s*["']GROK_API_KEY["']\s*\]\s*=\s*.*$', re.MULTILINE)
+pattern_line = re.compile(r"^\s*os\.environ\[\s*['\"]GROK_API_KEY['\"]\s*\]\s*=\s*.*$", re.MULTILINE)
 pattern_token = re.compile(r'gsk_[A-Za-z0-9_-]{10,}')
 
 for p in Path('.').rglob('*.py'):
