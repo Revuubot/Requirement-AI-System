@@ -17,7 +17,7 @@
       Requirement Intelligence Agent
     </h1>
 
-    <!-- ================= TEXT ANALYZER ================= -->
+
     <div class="bg-gray-800 p-5 rounded-lg mb-6">
       <h2 class="text-xl font-semibold mb-3">
         Paste Requirement Document Text
@@ -40,7 +40,7 @@
       </form>
     </div>
 
-    <!-- ================= PDF ANALYZER ================= -->
+  
     <div class="bg-gray-800 p-5 rounded-lg mb-6">
       <h2 class="text-xl font-semibold mb-3">
         Upload PDF Requirement Document
@@ -63,7 +63,7 @@
       </form>
     </div>
 
-    <!-- ================= RESULT PANEL ================= -->
+  
     <div class="bg-gray-800 p-5 rounded-lg">
       <h2 class="text-xl font-semibold mb-3">Analysis Result</h2>
 
@@ -75,7 +75,7 @@
     </div>
   </div>
 
-  <!-- ================= CLIENT JS ================= -->
+
   <script>
     async function handleResponse(res) {
       const box = document.getElementById("resultBox");
@@ -88,7 +88,7 @@
       }
     }
 
-    // TEXT SUBMIT
+  
     document.getElementById("textForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -102,7 +102,7 @@
       await handleResponse(res);
     });
 
-    // PDF SUBMIT
+  
     document.getElementById("pdfForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
