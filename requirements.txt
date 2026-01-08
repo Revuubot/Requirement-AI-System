@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+groq
+pandas
+pydantic
+PyMuPDF
+PyPDF2
+python-multipart
