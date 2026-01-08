@@ -15,11 +15,10 @@ def normalize_schema(data):
     matching the expected schema shape.
     """
 
-    # If model returned a list, wrap into fallback bucket
     if isinstance(data, list):
         return {
             **EMPTY_SCHEMA,
-            "functional_requirements": data   # best safe default
+            "functional_requirements": data   
         }
 
     normalized = {**EMPTY_SCHEMA}
