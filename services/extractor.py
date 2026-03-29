@@ -1,15 +1,13 @@
-from groq import Groq
-from services.config import GROQ_API_KEY
-
-import os
-
-
 import json
+from services.config import get_groq_client
 
-
-client = Groq(api_key=GROQ_API_KEY)
 
 def extract_requirements(text):
+    """
+    Extracts structured requirements using LLaMA-based AI.
+    """
+    client = get_groq_client()
+
     prompt = f"""
 Classify extracted information into the correct category.
 
@@ -42,8 +40,6 @@ For source_quote:
 If a requirement value cannot be directly matched to a sentence,
 do NOT include it.
 
-
-
 Return STRICT JSON in this structure:
 
 {{
@@ -61,7 +57,6 @@ Text:
 {text}
 """
 
-
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         response_format={"type": "json_object"},
@@ -75,6 +70,3 @@ Text:
 
     # convert JSON string → python dict
     return json.loads(output)
-
-
-

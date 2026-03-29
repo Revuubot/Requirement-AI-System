@@ -1,10 +1,6 @@
 import json
-from groq import Groq
-from services.config import GROQ_API_KEY
+from services.config import get_groq_client
 
-import os
-
-client = Groq(api_key=GROQ_API_KEY)
 
 def plan_tasks(requirements, risks):
     """
@@ -15,6 +11,7 @@ def plan_tasks(requirements, risks):
     - acceptance criteria
     - risk dependencies
     """
+    client = get_groq_client()
 
     prompt = f"""
 You are a software engineering planning assistant.

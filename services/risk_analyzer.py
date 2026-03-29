@@ -1,16 +1,13 @@
 import json
-from groq import Groq
-from services.config import GROQ_API_KEY
+from services.config import get_groq_client
 
-import os
-
-client = Groq(api_key=GROQ_API_KEY)
 
 def analyze_risks(text: str):
     """
     Risk & Dependency Analyzer
     Returns grounded, structured risk insights.
     """
+    client = get_groq_client()
 
     prompt = f"""
 You are a risk & ambiguity analysis assistant for software requirement documents.
