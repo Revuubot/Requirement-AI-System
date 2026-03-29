@@ -1,11 +1,13 @@
 from groq import Groq
+from services.config import GROQ_API_KEY
+
 import os
-os.environ["GROQ_API_KEY"] = "[REDACTED_GROK_KEY]"
+
 
 import json
 
 
-client = Groq()
+client = Groq(api_key=GROQ_API_KEY)
 
 def extract_requirements(text):
     prompt = f"""
@@ -62,6 +64,7 @@ Text:
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
+        response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You extract strictly factual requirements from text."},
             {"role": "user", "content": prompt}

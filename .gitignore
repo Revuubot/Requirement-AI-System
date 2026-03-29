@@ -5,16 +5,105 @@ venv/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# IDE files
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Pyre
+.pyre/
+
+# IDEs and editors
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
-# PDFs uploaded
-uploads/
-temp/
-cache/
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Logs
+# logs and local env files
 *.log
+.env.local
+.env.*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution artifacts
+*.egg-info/
+dist/
+build/
+
+# Static analysis
+.mediacheck
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Coverage reports
+coverage/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Local config
+/local_settings.py
+
+# API keys and secrets
+secrets.json
+credentials.json

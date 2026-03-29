@@ -7,3 +7,5 @@ pydantic
 PyMuPDF
 PyPDF2
 python-multipart
+openpyxl
+requests

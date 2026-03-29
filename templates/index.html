@@ -2,120 +2,1117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Requirement Intelligence Agent — Extract, analyze, and plan software requirements powered by AI." />
   <title>Requirement Intelligence Agent</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-    rel="stylesheet"
-  />
+    :root {
+      --bg:          #0c0c0c;
+      --bg-2:        #111111;
+      --bg-3:        #161616;
+      --gold:        #c9a84c;
+      --gold-dim:    rgba(201,168,76,0.15);
+      --gold-border: rgba(201,168,76,0.25);
+      --text:        #e8e0d0;
+      --text-dim:    #7a7468;
+      --text-mid:    #a09890;
+      --border:      rgba(255,255,255,0.07);
+      --border-soft: rgba(255,255,255,0.04);
+      --green:       #4caf82;
+      --blue:        #5b8dee;
+      --red:         #d95f5f;
+      --amber:       #d4a94a;
+      --radius:      4px;
+      --radius-lg:   8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GRAIN TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 28px 100px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 52px 0 44px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .logo-area {}
+    .logo-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .logo-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .logo-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    .header-meta {
+      text-align: right;
+    }
+    .header-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      display: inline-block;
+    }
+    .header-badge span {
+      color: var(--gold);
+    }
+
+    /* ── SECTION HEADING ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      flex-shrink: 0;
+    }
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    /* ── LOADING BAR ── */
+    .loading-bar {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+      margin-bottom: 40px;
+      display: none;
+      opacity: 0.8;
+    }
+    .loading-bar.active { display: block; }
+    @keyframes shimmer { 0%,100% { background-position: 200% 0; } 50% { background-position: -200% 0; } }
+
+    /* ── INPUT CARD ── */
+    .input-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 56px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: all 0.2s;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .tab:last-child { border-right: none; }
+    .tab.active {
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--gold);
+    }
+    .tab:hover:not(.active) { color: var(--text-mid); background: var(--border-soft); }
+
+    .tab-panel { display: none; padding: 28px; }
+    .tab-panel.active { display: block; }
+
+    /* ── TEXTAREA / INPUTS ── */
+    textarea, input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      resize: vertical;
+    }
+    textarea:focus, input:focus {
+      border-color: var(--gold-border);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    }
+    textarea::placeholder, input::placeholder { color: var(--text-dim); font-style: italic; }
+
+    /* ── FILE UPLOAD ── */
+    .file-drop {
+      border: 1px dashed rgba(201,168,76,0.2);
+      border-radius: var(--radius);
+      padding: 48px 36px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      background: var(--bg-3);
+    }
+    .file-drop:hover, .file-drop.drag-over {
+      border-color: var(--gold-border);
+      background: var(--gold-dim);
+    }
+    .file-drop input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .file-drop-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+    .file-drop-text {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+    .file-drop-text strong { color: var(--gold); font-style: normal; font-weight: 500; }
+    .file-drop-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      margin-top: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: var(--radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0c0c0c;
+      border-color: var(--gold);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: #d4b260; box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .btn-full { width: 100%; justify-content: center; margin-top: 20px; padding: 13px; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-mid);
+      border-color: var(--border);
+    }
+    .btn-outline:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+    .btn-green-o  { background: transparent; color: var(--green); border-color: rgba(76,175,130,0.3); }
+    .btn-green-o:hover  { background: rgba(76,175,130,0.08); }
+    .btn-blue-o   { background: transparent; color: var(--blue); border-color: rgba(91,141,238,0.3); }
+    .btn-blue-o:hover   { background: rgba(91,141,238,0.08); }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 1.5px solid rgba(0,0,0,0.2);
+      border-top-color: #0c0c0c;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULTS SECTION ── */
+    #resultsSection {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    #resultsSection.visible {
+      opacity: 1; transform: translateY(0); pointer-events: auto;
+    }
+
+    /* ── EXPORT BAR ── */
+    .export-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border: 1px solid var(--gold-border);
+      background: var(--gold-dim);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+    .export-bar-text {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+    .export-bar-text strong {
+      color: var(--gold);
+      font-style: normal;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .export-bar-actions { display: flex; gap: 8px; }
+
+    /* ── RESULT TABS ── */
+    .result-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .result-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-tab {
+      flex: 1;
+      padding: 13px 10px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: all 0.2s;
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      position: relative;
+    }
+    .result-tab:last-child { border-right: none; }
+    .result-tab.active {
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+    .result-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+    }
+    .result-tab:hover:not(.active) { color: var(--text-mid); }
+    .result-tab .count {
+      font-size: 9px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 100px;
+      padding: 1px 6px;
+      color: var(--text-mid);
+    }
+    .result-tab.active .count {
+      background: rgba(201,168,76,0.2);
+      color: var(--gold);
+    }
+
+    .result-panel { display: none; padding: 24px; }
+    .result-panel.active { display: block; }
+
+    /* ── REQUIREMENT ITEMS ── */
+    .req-item {
+      border-left: 2px solid var(--border);
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .req-item:hover { border-left-color: var(--gold); }
+    .req-item-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+    .req-item-value {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .req-item-quote {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-top: 6px;
+      padding-left: 10px;
+      border-left: 1px solid var(--border);
+    }
+
+    /* ── RISK ITEMS ── */
+    .risk-item {
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-3);
+      transition: border-color 0.2s;
+    }
+    .risk-item:hover { border-color: rgba(255,255,255,0.12); }
+    .risk-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .risk-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    .impact-high   { background: rgba(217,95,95,0.15); color: #e8a0a0; border: 1px solid rgba(217,95,95,0.25); }
+    .impact-medium { background: rgba(212,169,74,0.15); color: #e0c070; border: 1px solid rgba(212,169,74,0.25); }
+    .impact-low    { background: rgba(76,175,130,0.15); color: #80c9a8; border: 1px solid rgba(76,175,130,0.25); }
+    .risk-type-label { font-size: 13px; font-weight: 500; color: var(--text); }
+    .risk-desc { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .risk-quote { font-size: 11px; color: var(--text-dim); font-style: italic; margin-top: 6px; padding-left: 10px; border-left: 1px solid var(--border); }
+    .risk-action { font-size: 12px; color: var(--blue); margin-top: 8px; }
+
+    /* ── TASK PLAN ── */
+    .epic-block { margin-bottom: 28px; }
+    .epic-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      padding: 12px 16px;
+      border-left: 3px solid var(--gold);
+      background: var(--gold-dim);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-bottom: 12px;
+    }
+    .story-block {
+      padding-left: 16px;
+      border-left: 1px solid var(--border);
+      margin-bottom: 14px;
+      margin-left: 10px;
+    }
+    .story-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-mid);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+      padding: 6px 0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+    }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      transition: border-color 0.2s;
+    }
+    .task-item:hover { border-color: rgba(255,255,255,0.1); }
+    .task-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+      margin-top: 6px;
+      opacity: 0.6;
+    }
+    .task-text { flex: 1; font-size: 13px; color: var(--text); line-height: 1.5; }
+    .task-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+    .task-chip {
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 7px;
+      border-radius: 2px;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .chip-priority-high   { background: rgba(217,95,95,0.12); color: #e8a0a0; }
+    .chip-priority-medium { background: rgba(212,169,74,0.12); color: #e0c070; }
+    .chip-priority-low    { background: rgba(76,175,130,0.12); color: #80c9a8; }
+    .chip-effort { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+    .chip-type   { background: rgba(91,141,238,0.12); color: #93b3f0; }
+
+    /* ── RAW JSON ── */
+    .raw-json {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      max-height: 520px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.7;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      width: 100%; max-width: 440px;
+      box-shadow: 0 32px 100px rgba(0,0,0,0.7);
+      animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(8px); } }
+
+    .modal-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 7px;
+    }
+
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .modal-actions { display: flex; gap: 8px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* ── STATUS ── */
+    .status-msg { font-size: 12px; margin-top: 14px; min-height: 18px; text-align: center; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
+    .status-success { color: var(--green); }
+    .status-error   { color: var(--red); }
+    .status-pending { color: var(--amber); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-style: italic;
+    }
+    .empty-icon { font-size: 28px; margin-bottom: 14px; opacity: 0.3; }
+
+    /* ── SCROLLBAR ── */
+    {% raw %}* { scrollbar-width: thin; scrollbar-color: rgba(201,168,76,0.15) transparent; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 2px; }{% endraw %}
+
+    /* ── FOOTER RULE ── */
+    .footer-rule {
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+      padding-top: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+  </style>
 </head>
+<body>
 
-<body class="bg-gray-900 text-white">
+<div class="wrapper">
 
-  <div class="container mx-auto px-8 py-8">
-    <h1 class="text-3xl font-bold mb-6">
-      Requirement Intelligence Agent
-    </h1>
+  <!-- HEADER -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-eyebrow">AI-Powered Analysis Agent</div>
+      <div class="logo-title">Requirement <em>Intelligence</em></div>
+      <div class="logo-sub">Extract · Analyze · Plan — powered by LLaMA 3.1 via Groq</div>
+    </div>
+    <div class="header-meta">
+      <div class="header-badge">Model <span>llama-3.1-8b</span></div>
+    </div>
+  </header>
 
-    <!-- ================= TEXT ANALYZER ================= -->
-    <div class="bg-gray-800 p-5 rounded-lg mb-6">
-      <h2 class="text-xl font-semibold mb-3">
-        Paste Requirement Document Text
-      </h2>
+  <!-- LOADING BAR -->
+  <div class="loading-bar" id="loadingBar"></div>
 
+  <!-- INPUT SECTION -->
+  <div class="section-head">
+    <div class="section-num">01</div>
+    <div class="section-rule"></div>
+  </div>
+  <div class="section-label">Document Input</div>
+
+  <div class="input-card">
+    <div class="tabs">
+      <button class="tab active" id="tabText" onclick="switchTab('text')">Paste Text</button>
+      <button class="tab" id="tabPdf" onclick="switchTab('pdf')">Upload PDF</button>
+    </div>
+
+    <!-- Text panel -->
+    <div id="panelText" class="tab-panel active">
       <form id="textForm">
-        <textarea
-          name="text"
-          rows="10"
-          class="w-full p-3 rounded bg-gray-700 border border-gray-600"
-          placeholder="Paste requirement text here..."
-        ></textarea>
-
-        <button
-          type="submit"
-          class="mt-3 px-4 py-2 bg-yellow-400 text-black font-bold rounded"
-        >
-          Analyze Text
+        <textarea id="textInput" name="text" rows="9" placeholder="Paste your software requirement document here..."></textarea>
+        <button type="submit" class="btn btn-primary btn-full" id="btnAnalyzeText">
+          Run Analysis
         </button>
       </form>
     </div>
 
-    <!-- ================= PDF ANALYZER ================= -->
-    <div class="bg-gray-800 p-5 rounded-lg mb-6">
-      <h2 class="text-xl font-semibold mb-3">
-        Upload PDF Requirement Document
-      </h2>
-
+    <!-- PDF panel -->
+    <div id="panelPdf" class="tab-panel">
       <form id="pdfForm" enctype="multipart/form-data">
-        <input
-          type="file"
-          name="file"
-          accept="application/pdf"
-          class="text-white"
-        />
-
-        <button
-          type="submit"
-          class="ml-3 px-4 py-2 bg-yellow-400 text-black font-bold rounded"
-        >
+        <div class="file-drop" id="fileDrop">
+          <input type="file" name="file" accept="application/pdf" id="fileInput" />
+          <div class="file-drop-icon">📄</div>
+          <div class="file-drop-text">Drag &amp; drop PDF here, or <strong>browse</strong></div>
+          <div class="file-drop-filename" id="fileNameDisplay"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="btnAnalyzePdf">
           Analyze PDF
         </button>
       </form>
     </div>
+  </div>
 
-    <!-- ================= RESULT PANEL ================= -->
-    <div class="bg-gray-800 p-5 rounded-lg">
-      <h2 class="text-xl font-semibold mb-3">Analysis Result</h2>
+  <!-- RESULTS SECTION -->
+  <div id="resultsSection">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <div class="section-rule"></div>
+    </div>
+    <div class="section-label">Analysis Results</div>
 
-      <pre
-        id="resultBox"
-        class="bg-black text-green-400 p-4 rounded overflow-auto"
-        style="min-height: 160px"
-      >Waiting for input...</pre>
+    <!-- Export bar -->
+    <div class="export-bar" id="exportBar">
+      <div class="export-bar-text">Analysis complete — <strong id="summaryText"></strong></div>
+      <div class="export-bar-actions">
+        <button class="btn btn-green-o" id="btnExportExcel">↓ Export Excel</button>
+        <button class="btn btn-blue-o" id="btnExportJira">⇢ Sync Jira</button>
+      </div>
+    </div>
+
+    <!-- Results tabs -->
+    <div class="result-card">
+      <div class="result-tabs">
+        <button class="result-tab active" onclick="switchResult('requirements')" id="rtab-requirements">
+          Requirements <span class="count" id="cnt-req">0</span>
+        </button>
+        <button class="result-tab" onclick="switchResult('risks')" id="rtab-risks">
+          Risks <span class="count" id="cnt-risk">0</span>
+        </button>
+        <button class="result-tab" onclick="switchResult('tasks')" id="rtab-tasks">
+          Task Plan <span class="count" id="cnt-tasks">0</span>
+        </button>
+        <button class="result-tab" onclick="switchResult('raw')" id="rtab-raw">
+          { } Raw
+        </button>
+      </div>
+
+      <!-- Requirements -->
+      <div class="result-panel active" id="rpanel-requirements">
+        <div id="requirementsList"></div>
+      </div>
+      <!-- Risks -->
+      <div class="result-panel" id="rpanel-risks">
+        <div id="risksList"></div>
+      </div>
+      <!-- Tasks -->
+      <div class="result-panel" id="rpanel-tasks">
+        <div id="tasksList"></div>
+      </div>
+      <!-- Raw -->
+      <div class="result-panel" id="rpanel-raw">
+        <pre class="raw-json" id="rawJson"></pre>
+      </div>
     </div>
   </div>
 
-  <!-- ================= CLIENT JS ================= -->
-  <script>
-    async function handleResponse(res) {
-      const box = document.getElementById("resultBox");
+  <div class="footer-rule">Requirement Intelligence Agent &mdash; v1.0</div>
 
-      try {
-        const data = await res.json();
-        box.textContent = JSON.stringify(data, null, 2);
-      } catch {
-        box.textContent = "Server returned no JSON / crashed";
-      }
+</div>
+
+<!-- JIRA MODAL -->
+<div class="modal-overlay" id="jiraModal">
+  <div class="modal">
+    <div class="modal-eyebrow">Export</div>
+    <div class="modal-title">Sync to Jira</div>
+    <div class="modal-sub">Enter your Atlassian workspace details to push epics, stories, and tasks directly to your board.</div>
+    <form id="jiraForm">
+      <div class="form-group">
+        <label class="form-label">Jira URL</label>
+        <input type="text" name="jira_url" placeholder="https://yourorg.atlassian.net" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account Email</label>
+        <input type="email" name="email" placeholder="you@company.com" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">API Token</label>
+        <input type="password" name="api_token" placeholder="••••••••••••••••" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Project Key</label>
+        <input type="text" name="project_key" placeholder="e.g. PROJ" required />
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="btnCancelJira">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="btnJiraSubmit">Export Issues</button>
+      </div>
+      <div class="status-msg" id="jiraStatus"></div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  let currentData = null;
+
+  /* ── TABS ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+    document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  }
+
+  function switchResult(name) {
+    document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.result-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('rtab-' + name).classList.add('active');
+    document.getElementById('rpanel-' + name).classList.add('active');
+  }
+
+  /* ── FILE DISPLAY ── */
+  document.getElementById('fileInput').addEventListener('change', function () {
+    const fname = this.files[0]?.name || '';
+    document.getElementById('fileNameDisplay').textContent = fname ? '✓ ' + fname : '';
+  });
+
+  const fileDrop = document.getElementById('fileDrop');
+  fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+  fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag-over'));
+  fileDrop.addEventListener('drop', e => {
+    e.preventDefault(); fileDrop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer(); dt.items.add(file);
+      document.getElementById('fileInput').files = dt.files;
+      document.getElementById('fileNameDisplay').textContent = '✓ ' + file.name;
     }
+  });
 
-    // TEXT SUBMIT
-    document.getElementById("textForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+  /* ── LOADING ── */
+  function setLoading(loading) {
+    const bar = document.getElementById('loadingBar');
+    bar.classList.toggle('active', loading);
+    document.getElementById('btnAnalyzeText').disabled = loading;
+    document.getElementById('btnAnalyzePdf').disabled = loading;
+  }
 
-      const formData = new FormData(e.target);
+  /* ── TOAST ── */
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
 
-      const res = await fetch("/api/ui/analyze-text", {
-        method: "POST",
-        body: formData
-      });
+  /* ── RENDER RESULTS ── */
+  function renderRequirements(data) {
+    const container = document.getElementById('requirementsList');
+    const funcReqs = data.requirements?.functional_requirements || [];
+    const nonFuncReqs = data.requirements?.non_functional_requirements || [];
+    const all = [
+      ...funcReqs.map(r => ({ ...r, type: 'Functional' })),
+      ...nonFuncReqs.map(r => ({ ...r, type: 'Non-Functional' }))
+    ];
+    document.getElementById('cnt-req').textContent = all.length;
+    if (!all.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No requirements found.</div>';
+      return;
+    }
+    container.innerHTML = all.map(r => `
+      <div class="req-item">
+        <div class="req-item-label">${r.type}</div>
+        <div class="req-item-value">${r.value || '—'}</div>
+        ${r.source_quote ? `<div class="req-item-quote">${r.source_quote}</div>` : ''}
+      </div>`).join('');
+  }
 
-      await handleResponse(res);
+  function renderRisks(data) {
+    const container = document.getElementById('risksList');
+    const risks = data.risks?.risks || [];
+    document.getElementById('cnt-risk').textContent = risks.length;
+    if (!risks.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>No risks identified.</div>';
+      return;
+    }
+    container.innerHTML = risks.map(r => {
+      const impact = (r.impact || '').toLowerCase();
+      const cls = impact.includes('high') ? 'impact-high' : impact.includes('medium') ? 'impact-medium' : 'impact-low';
+      return `
+      <div class="risk-item">
+        <div class="risk-header">
+          <span class="risk-badge ${cls}">${r.impact || 'Unknown'}</span>
+          <span class="risk-type-label">${r.type || 'Risk'}</span>
+        </div>
+        <div class="risk-desc">${r.description || '—'}</div>
+        ${r.source_quote ? `<div class="risk-quote">${r.source_quote}</div>` : ''}
+        ${r.recommended_action ? `<div class="risk-action">→ ${r.recommended_action}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function renderTasks(data) {
+    const container = document.getElementById('tasksList');
+    const epics = data.task_plan?.epics || [];
+    let totalTasks = 0;
+    epics.forEach(e => e.stories?.forEach(s => totalTasks += (s.tasks?.length || 0)));
+    document.getElementById('cnt-tasks').textContent = totalTasks;
+    if (!epics.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">◻</div>No task plan generated.</div>';
+      return;
+    }
+    container.innerHTML = epics.map(epic => `
+      <div class="epic-block">
+        <div class="epic-title">${epic.title}</div>
+        ${(epic.stories || []).map(story => `
+          <div class="story-block">
+            <div class="story-title">${story.story}</div>
+            ${(story.tasks || []).map(task => {
+              const prio = (task.priority || '').toLowerCase();
+              const prioClass = prio === 'high' ? 'chip-priority-high' : prio === 'medium' ? 'chip-priority-medium' : 'chip-priority-low';
+              return `<div class="task-item">
+                <div class="task-dot"></div>
+                <div class="task-text">
+                  ${task.task}
+                  <div class="task-meta">
+                    ${task.type ? `<span class="task-chip chip-type">${task.type}</span>` : ''}
+                    ${task.priority ? `<span class="task-chip ${prioClass}">${task.priority}</span>` : ''}
+                    ${task.effort ? `<span class="task-chip chip-effort">${task.effort}</span>` : ''}
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`).join('')}
+      </div>`).join('');
+  }
+
+  function renderSummary(data) {
+    const funcReqs = data.requirements?.functional_requirements?.length || 0;
+    const nonFuncReqs = data.requirements?.non_functional_requirements?.length || 0;
+    const risks = data.risks?.risks?.length || 0;
+    document.getElementById('summaryText').textContent =
+      `${funcReqs + nonFuncReqs} requirements · ${risks} risks identified`;
+  }
+
+  /* ── HANDLE RESPONSE ── */
+  async function handleResponse(res) {
+    setLoading(false);
+    try {
+      const data = await res.json();
+      if (res.ok) {
+        currentData = data;
+        document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+        renderRequirements(data);
+        renderRisks(data);
+        renderTasks(data);
+        renderSummary(data);
+        const section = document.getElementById('resultsSection');
+        section.classList.add('visible');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        switchResult('requirements');
+        showToast('Analysis complete');
+      } else {
+        showToast('Error: ' + (data.detail || 'Unknown error'));
+      }
+    } catch {
+      showToast('Server error — check console');
+    }
+  }
+
+  /* ── TEXT FORM ── */
+  document.getElementById('textForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await fetch('/api/ui/analyze-text', { method: 'POST', body: new FormData(e.target) });
+    await handleResponse(res);
+  });
+
+  /* ── PDF FORM ── */
+  document.getElementById('pdfForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await fetch('/api/ui/analyze-pdf', { method: 'POST', body: new FormData(e.target) });
+    await handleResponse(res);
+  });
+
+  /* ── EXCEL EXPORT ── */
+  document.getElementById('btnExportExcel').addEventListener('click', async () => {
+    if (!currentData) return;
+    const btn = document.getElementById('btnExportExcel');
+    btn.innerHTML = '<span class="spinner" style="border-top-color:var(--green);border-color:rgba(76,175,130,0.2);"></span> Generating...';
+    btn.disabled = true;
+    const res = await fetch('/api/ui/export-excel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentData)
     });
-
-    // PDF SUBMIT
-    document.getElementById("pdfForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(e.target);
-
-      const res = await fetch("/api/ui/analyze-pdf", {
-        method: "POST",
-        body: formData
+    if (res.ok) {
+      const blob = await res.blob();
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(blob), download: 'analysis_export.xlsx'
       });
+      document.body.appendChild(a); a.click(); a.remove();
+      showToast('Excel downloaded');
+    } else {
+      showToast('Excel export failed');
+    }
+    btn.innerHTML = '↓ Export Excel';
+    btn.disabled = false;
+  });
 
-      await handleResponse(res);
-    });
-  </script>
+  /* ── JIRA MODAL ── */
+  const jiraModal = document.getElementById('jiraModal');
+  document.getElementById('btnExportJira').addEventListener('click', () => {
+    jiraModal.classList.add('open');
+    document.getElementById('jiraStatus').textContent = '';
+    document.getElementById('jiraStatus').className = 'status-msg';
+  });
+  document.getElementById('btnCancelJira').addEventListener('click', () => jiraModal.classList.remove('open'));
+  jiraModal.addEventListener('click', (e) => { if (e.target === jiraModal) jiraModal.classList.remove('open'); });
+
+  document.getElementById('jiraForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const submitBtn = document.getElementById('btnJiraSubmit');
+    const statusEl = document.getElementById('jiraStatus');
+
+    submitBtn.innerHTML = '<span class="spinner"></span> Exporting...';
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Connecting to Jira...';
+    statusEl.className = 'status-msg status-pending';
+
+    try {
+      const res = await fetch('/api/ui/export-jira', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          config: {
+            jira_url: fd.get('jira_url'),
+            email: fd.get('email'),
+            api_token: fd.get('api_token'),
+            project_key: fd.get('project_key')
+          },
+          task_plan: currentData.task_plan
+        })
+      });
+      const resp = await res.json();
+      if (res.ok && resp.status === 'success') {
+        statusEl.textContent = `Created ${resp.issues_created} issues successfully`;
+        statusEl.className = 'status-msg status-success';
+        showToast(`${resp.issues_created} issues pushed to Jira`);
+        setTimeout(() => jiraModal.classList.remove('open'), 2500);
+      } else {
+        statusEl.textContent = 'Failed: ' + JSON.stringify(resp.detail || resp);
+        statusEl.className = 'status-msg status-error';
+      }
+    } catch (err) {
+      statusEl.textContent = 'Error: ' + err.message;
+      statusEl.className = 'status-msg status-error';
+    } finally {
+      submitBtn.innerHTML = 'Export Issues';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
 
 </body>
 </html>

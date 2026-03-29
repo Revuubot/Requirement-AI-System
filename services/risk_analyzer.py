@@ -1,8 +1,10 @@
 import json
 from groq import Groq
+from services.config import GROQ_API_KEY
+
 import os
-os.environ["GROQ_API_KEY"] = "[REDACTED_GROK_KEY]"
-client = Groq()
+
+client = Groq(api_key=GROQ_API_KEY)
 
 def analyze_risks(text: str):
     """
@@ -56,6 +58,7 @@ Text to analyze:
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
+        response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You analyze requirement risks with evidence-grounded reasoning only."},
             {"role": "user", "content": prompt}
