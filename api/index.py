@@ -6,52 +6,61 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-# Add the root directory to the Python path to ensure imports like 'api.*' and 'services.*' work
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # this is root/api
+# 1. SETUP PATHS
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # root/api
 ROOT_DIR = os.path.dirname(BASE_DIR)
 sys.path.append(ROOT_DIR)
 
-# Import the router using the proper package notation
+# 2. FAIL-SAFE INITIALIZATION
 try:
+    # Import routes and logic
     from api.routes import router
-except ImportError:
-    from .routes import router
-
-app = FastAPI(
-    title="Requirement Intelligence Agent",
-    version="1.0"
-)
-
-# Global Exception Handler for Debugging on Vercel
-@app.exception_handler(Exception)
-async def debug_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal Server Error (Vercel Debug Mode)",
-            "message": str(exc),
-            "traceback": traceback.format_exc(),
-            "path": request.url.path
-        }
+    
+    app = FastAPI(
+        title="Requirement Intelligence Agent",
+        version="1.0"
     )
 
-# Static files and Templates using paths relative to the root
-app.mount("/static", StaticFiles(directory=os.path.join(ROOT_DIR, "static")), name="static")
-templates = Jinja2Templates(directory=os.path.join(ROOT_DIR, "templates"))
+    # Static files and Templates using paths relative to the root
+    app.mount("/static", StaticFiles(directory=os.path.join(ROOT_DIR, "static")), name="static")
+    templates = Jinja2Templates(directory=os.path.join(ROOT_DIR, "templates"))
 
-@app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    try:
+    @app.get("/", response_class=HTMLResponse)
+    async def dashboard(request: Request):
         return templates.TemplateResponse("index.html", {"request": request})
-    except Exception as e:
-        # Fallback to pure text if template fails
-        return HTMLResponse(content=f"Template Error: {str(e)}<br><pre>{traceback.format_exc()}</pre>", status_code=500)
 
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "message": "Requirement Intelligence API is running on Vercel"}
+    @app.get("/health")
+    async def health_check():
+        return {"status": "ok", "message": "Requirement Intelligence API is running"}
 
-app.include_router(router, prefix="/api")
+    app.include_router(router, prefix="/api")
+
+except Exception as e:
+    # 3. RESCUE APP: If any error happens during import/startup, catch it here.
+    # This minimal app will display the traceback so we can debug the 500 error.
+    app = FastAPI(title="Rescue App (Debug Mode)")
+    
+    error_traceback = traceback.format_exc()
+
+    @app.get("/{full_path:path}")
+    async def rescue_route(request: Request, full_path: str):
+        return HTMLResponse(
+            content=f"""
+            <html>
+                <head><title>500 Internal Server Error (Debug Output)</title></head>
+                <body style="font-family: monospace; background: #111; color: #ff5555; padding: 20px;">
+                    <h1>🚨 Startup Error Detected (Vercel)</h1>
+                    <p>The application failed to start due to an error during initialization.</p>
+                    <hr/>
+                    <h2>Error Message:</h2>
+                    <pre style="background: #222; padding: 15px; border-radius: 5px;">{str(e)}</pre>
+                    <h2>Traceback:</h2>
+                    <pre style="background: #222; padding: 15px; border-radius: 5px;">{error_traceback}</pre>
+                </body>
+            </html>
+            """,
+            status_code=500
+        )
 
 # Export for Vercel
 app = app
