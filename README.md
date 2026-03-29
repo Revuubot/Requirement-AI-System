@@ -1,59 +1,70 @@
-# 🧠 Requirement Intelligence AI System
+# 🧠 Requirement Intelligence Agent
 
-An AI-powered requirement analysis system that converts unstructured text or PDFs into **structured software requirements, risk analysis, and actionable task plans** using **Generative AI**.
+An AI-powered system designed to analyze unstructured software requirement documents (text or PDFs) and automatically translate them into structured **Functional/Non-Functional Requirements**, **Risk Analysis**, and actionable **Task Plans** using **Generative AI** (LLaMA 3.1 via Groq).
 
-This project simulates how real-world **product, engineering, and consulting teams** analyze client requirement documents before development.
-
----
-
-## 🚀 What This Project Does
-
-The system accepts:
-
-- 📄 Plain text  
-- 📑 PDF requirement documents  
-
-And automatically generates:
-
-- ✅ Structured Requirements  
-- ⚠️ Risk & Assumption Analysis  
-- 🧩 Task Breakdown (Epics → Stories → Tasks)  
-
-All outputs are generated using **Large Language Models (LLMs)** and served through a **FastAPI backend** with a simple UI dashboard.
+This project simulates how real-world product, engineering, and consulting teams decompose client prompts before kicking off development.
 
 ---
 
-## 🧩 Core Features
+## 🚀 Features
 
-### 🔹 Requirement Extraction
-- Identifies **functional requirements**
-- Identifies **non-functional requirements**
-- Extracts **open questions & assumptions**
+The system accepts **Plain Text** or **PDF Uploads** and automatically generates:
 
-### 🔹 Risk Analysis
-- Detects **technical risks**
-- Detects **business & operational risks**
-- Flags **dependencies & unclear areas**
-- Suggests **mitigation actions**
+- ✅ **Structured Requirements** (Functional & Non-Functional with source traceability)
+- ⚠️ **Risk & Ambiguity Analysis** (Technical, scope, and operational risks + mitigation strategies)
+- 🧩 **Task Breakdown** (Agile format: Epics → User Stories → Engineering Tasks with priority/effort estimation)
+- 📊 **Excel Export** (Download complete analysis directly to `.xlsx`)
+- 🔗 **Jira Integration** (Push Epics, Stories, and Tasks directly to your Atlassian board)
 
-### 🔹 Task Planning
-Converts requirements into:
-- **Epics**
-- **User Stories**
-- **Engineering Tasks**
-- Includes **priority levels & effort estimates**
+All outputs are powered by **LLaMA 3.1 8B** and served via a lightning-fast **FastAPI backend** with a beautiful, responsive UI.
 
-### 🔹 Input Methods
-- Text input
-- PDF upload (no OCR dependency required)
+---
 
-### 🔹 Output Formats
-- Structured **JSON responses** (API)
-- **Human-readable UI output** (dashboard)
+## 🛠️ Quick Start Guide
+
+### Prerequisites
+- **Python 3.9+**
+- A **Groq API Key** (Get one for free at [console.groq.com](https://console.groq.com))
+
+### 1️⃣ Clone the Repository & Setup Environment
+```bash
+git clone https://github.com/Revuubot/Requirement-AI-system.git
+cd Requirement-AI-system
+
+# Create and activate a virtual environment
+python -m venv venv
+
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+```
+
+### 2️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Configure Environment Variables
+Create a file named `.env` in the root directory and add your Groq API key:
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
+```
+
+### 4️⃣ Run the Application
+Start the FastAPI server using Uvicorn:
+```bash
+python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 5️⃣ Open the App
+Visit [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
 ## 🏗️ Architecture Overview
+
+The system is built on an asynchronous, multi-stage LLM pipeline to ensure structured and reliable outputs.
 
 ```text
 User Input (Text / PDF)
@@ -67,97 +78,49 @@ User Input (Text / PDF)
 └───────────────────────────────┘
         ↓
  Structured JSON Output
+        ↓
+ UI / Excel Export / Jira Sync
  ```
----
-## 🔁 End-to-End AI Workflow
 
-This system follows a **multi-stage Generative AI pipeline** that mirrors how real-world product and engineering teams analyze requirement documents before development.
-
-### 1️⃣ Input Ingestion
-- Users submit **plain text** or upload **PDF requirement documents**
-- PDFs are parsed using **PyMuPDF** (no OCR dependency required)
-- All inputs are normalized into clean text for downstream processing
-
-### 2️⃣ Requirement Understanding (LLM)
-- Extracts **functional requirements**
-- Extracts **non-functional requirements**
-- Identifies **assumptions, ambiguities, and open questions**
-- Produces a structured requirement schema for further analysis
-
-### 3️⃣ Risk Intelligence (LLM)
-- Analyzes extracted requirements to identify:
-  - Technical risks
-  - Business risks
-  - Operational risks
-- Flags unclear dependencies and missing constraints
-- Suggests mitigation strategies for each identified risk
-
-### 4️⃣ Task Decomposition & Planning (LLM)
-- Converts validated requirements into:
-  - Epics
-  - User Stories
-  - Engineering Tasks
-- Assigns:
-  - Priority levels
-  - Effort estimates
-- Generates an execution-ready task plan
-
-### 5️⃣ Output & Delivery
-- Final outputs are delivered as:
-  - **Structured JSON** via REST APIs
-  - **Human-readable UI output** through a web dashboard
-- Enables easy integration with project management and planning tools
+### Tech Stack
+- **Backend:** Python, FastAPI, Uvicorn
+- **AI / LLM:** Groq SDK, LLaMA-3.1-8b-instant
+- **Frontend:** HTML, CSS (Custom Design System), Vanilla JS
+- **Data Processing:** pandas, openpyxl, PyMuPDF
+- **Integrations:** Jira REST API
 
 ---
 
-## 🌍 Why This Project Matters
+## 🔁 End-to-End Workflow
 
-In real-world software development, unclear or incomplete requirements are a major cause of project delays, scope creep, and cost overruns.
-
-This project demonstrates how **Generative AI can augment business analysts, product managers, and engineering teams** by:
-- Automating requirement understanding from unstructured documents
-- Identifying risks early in the development lifecycle
-- Translating vague ideas into structured, actionable task plans
-
-The system closely resembles **enterprise-grade pre-development workflows**, making it highly relevant for industry use.
+1. **Input Ingestion:** Users submit text or securely upload PDFs (parsed locally via PyMuPDF without OCR overhead).
+2. **Requirement Extraction (LLM):** The model extracts functional/non-functional requirements and ties them directly to the source quotes.
+3. **Risk Intelligence (LLM):** Identifies technical risks, ambiguities, and missing constraints in the original document.
+4. **Task Decomposition (LLM):** Synthesizes requirements into Epics, Stories, and concrete engineering Tasks formatted for Agile teams.
+5. **Output Delivery:** Results are displayed in the UI, and can be exported as Excel reports or automatically provisioned into Jira via the API.
 
 ---
 
-## 🧠 Key Design Decisions
+## 🌍 Why This Matters
 
-- Uses a **multi-stage LLM pipeline** instead of a single prompt for better reliability
-- Separates concern between extraction, risk analysis, and task planning
-- Produces **structured JSON outputs** for downstream system integration
-- Implements a **stateless FastAPI backend** for scalability
-- Avoids OCR dependency to reduce complexity and improve performance
+In real-world software development, unclear or incomplete requirements are a major cause of project delays, scope creep, and cost overruns. 
 
----
-
-## ✍️ Prompt Engineering Strategy
-
-Each LLM component uses carefully crafted prompts that:
-- Enforce structured outputs using predefined schemas
-- Reduce hallucinations by constraining response formats
-- Preserve context between pipeline stages
-- Isolate reasoning tasks to improve clarity and accuracy
-
-This approach reflects **best practices used in production GenAI systems**.
+This project demonstrates how **Generative AI** can augment business analysts and engineering teams by:
+- Identifying missing constraints before code is written
+- Structuring vague ideas into immediate, actionable engineering tasks
+- Eliminating manual copy-pasting via direct Jira and Excel pipelines
 
 ---
 
 ## ⚠️ Limitations & Assumptions
-
-- Output quality depends on the clarity of input requirements
-- Domain-specific terminology may require prompt tuning
-- LLM responses are probabilistic and may vary across runs
-- Currently processes one document at a time
+- Output quality heavily depends on the clarity of the input document.
+- Highly domain-specific jargon may require prompt adjustments.
+- Processing latency is dependent on the Groq API (though typically under 5 seconds).
 
 ---
 
 ## 📌 Future Improvements
-
-- Streaming responses for better UX
-- Retrieval-Augmented Generation (RAG) using vector databases
-- Multi-document comparison and conflict detection
-- Authentication and role-based access control
-- Cloud deployment and scalability enhancements
+- [ ] Retrieval-Augmented Generation (RAG) for large multi-document PRDs
+- [ ] Streaming AI responses to the frontend for better UX
+- [ ] Multi-document comparison and cross-reference conflict detection
+- [ ] Add GitHub Issues sync via the GitHub API
