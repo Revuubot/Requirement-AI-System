@@ -54,9 +54,7 @@ async def analyze_pdf_api(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# -----------------------------
-# 🎨 UI — TEXT FORM
-# -----------------------------
+
 @router.post("/ui/analyze-text")
 async def analyze_text_ui(text: str = Form(...)):
     try:
@@ -76,9 +74,7 @@ async def analyze_text_ui(text: str = Form(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# -----------------------------
-# 🎨 UI — PDF UPLOAD
-# -----------------------------
+
 @router.post("/ui/analyze-pdf")
 async def analyze_pdf_ui(file: UploadFile = File(...)):
     try:

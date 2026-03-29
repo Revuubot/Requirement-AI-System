@@ -21,7 +21,7 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
         print("PDF parsing error:", e)
         return ""
 
-    # Clean weird unicode artifacts sometimes seen in PDFs
+    
     text = (
         text.replace("\x00", "")
             .replace("\u200b", "")
