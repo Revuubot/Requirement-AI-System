@@ -9,3 +9,4 @@ PyPDF2
 python-multipart
 openpyxl
 requests
+jinja2
