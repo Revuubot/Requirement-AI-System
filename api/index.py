@@ -1,18 +1,58 @@
 import os
 import sys
 import traceback
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 # 1. SETUP PATHS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # root/api
 ROOT_DIR = os.path.dirname(BASE_DIR)
 sys.path.append(ROOT_DIR)
 
-# 2. FAIL-SAFE INITIALIZATION
+# 2. DEEP RESCUE ASGI APP (RAW PYTHON, NO DEPENDENCIES)
+async def rescue_app(scope, receive, send):
+    if scope['type'] != 'http':
+        return
+    
+    error_header = b'Internal Server Error (Deep Diagnosis Mode)'
+    error_body = f"""
+    <html>
+        <head><title>500 Deep Diagnostic Error</title></head>
+        <body style="font-family: monospace; background: #1a1a1a; color: #ff5c5c; padding: 40px; line-height: 1.5;">
+            <h1 style="border-bottom: 2px solid #ff5c5c; padding-bottom: 10px;">🚨 Deep Startup Error (Vercel)</h1>
+            <p>The Python environment failed to initialize correctly. This usually happens when a required library (like FastAPI) fails to import.</p>
+            <hr style="opacity: 0.1"/>
+            <h2>Crash Traceback:</h2>
+            <pre style="background: #2b2b2b; padding: 20px; border-radius: 8px; overflow-x: auto; color: #fff;">{traceback.format_exc()}</pre>
+            <h2>Environment Diagnostics:</h2>
+            <ul style="color: #ccc;">
+                <li><b>Python Version:</b> {sys.version}</li>
+                <li><b>Root Directory:</b> {ROOT_DIR}</li>
+                <li><b>CWD:</b> {os.getcwd()}</li>
+                <li><b>Path:</b> {sys.path}</li>
+            </ul>
+        </body>
+    </html>
+    """.encode('utf-8')
+
+    await send({
+        'type': 'http.response.start',
+        'status': 500,
+        'headers': [
+            [b'content-type', b'text/html'],
+            [b'content-length', str(len(error_body)).encode('utf-8')],
+        ],
+    })
+    await send({
+        'type': 'http.response.body',
+        'body': error_body,
+    })
+
+# 3. TRY LOADING REAL APP
 try:
+    from fastapi import FastAPI, Request
+    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.templating import Jinja2Templates
+
     # Import routes and logic
     from api.routes import router
     
@@ -35,32 +75,10 @@ try:
 
     app.include_router(router, prefix="/api")
 
-except Exception as e:
-    # 3. RESCUE APP: If any error happens during import/startup, catch it here.
-    # This minimal app will display the traceback so we can debug the 500 error.
-    app = FastAPI(title="Rescue App (Debug Mode)")
-    
-    error_traceback = traceback.format_exc()
-
-    @app.get("/{full_path:path}")
-    async def rescue_route(request: Request, full_path: str):
-        return HTMLResponse(
-            content=f"""
-            <html>
-                <head><title>500 Internal Server Error (Debug Output)</title></head>
-                <body style="font-family: monospace; background: #111; color: #ff5555; padding: 20px;">
-                    <h1>🚨 Startup Error Detected (Vercel)</h1>
-                    <p>The application failed to start due to an error during initialization.</p>
-                    <hr/>
-                    <h2>Error Message:</h2>
-                    <pre style="background: #222; padding: 15px; border-radius: 5px;">{str(e)}</pre>
-                    <h2>Traceback:</h2>
-                    <pre style="background: #222; padding: 15px; border-radius: 5px;">{error_traceback}</pre>
-                </body>
-            </html>
-            """,
-            status_code=500
-        )
+except Exception:
+    # If the REAL app fails to load, the global 'app' will be the rescue app
+    app = rescue_app
 
 # Export for Vercel
-app = app
+# Important: Vercel expects 'app' to be an ASGI handler
+handler = app
