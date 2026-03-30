@@ -4,6 +4,8 @@ An AI-powered system designed to analyze unstructured software requirement docum
 
 This project simulates how real-world product, engineering, and consulting teams decompose client prompts before kicking off development.
 
+You can try this app here https://requirement-ai-system.vercel.app/
+
 ---
 
 ## 🚀 Features
